@@ -41,4 +41,9 @@ public class AlunoController {
                 tabela.getValueAt(linha, 4).toString()
         );
     }
+
+    public void excluirAluno(JTable tabela, int linha) {
+        DefaultTableModel model = (DefaultTableModel) tabela.getModel();
+        model.removeRow(linha);
+    }
 }

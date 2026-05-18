@@ -24,8 +24,6 @@ public class GerInterGrafica {
     
     private GerenciadorDominio gerDominio;
     
-    // ## SINGLETON ###
-    
     private static GerInterGrafica myInstance = new GerInterGrafica();
     
     private GerInterGrafica() {

@@ -4,7 +4,6 @@ import controller.AlunoController;
 import controller.GerInterGrafica;
 import controller.PersonalController;
 import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
 
 public class FrmPrincipal extends javax.swing.JFrame {
 
@@ -465,7 +464,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
             if (JOptionPane.showConfirmDialog(this, "Deseja realmente excluir?", "Excluir Aluno", 
                     JOptionPane.WARNING_MESSAGE, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION){
                 
-                ((DefaultTableModel) tblAlunos.getModel()).removeRow(linha);
+                alunoController.excluirAluno(tblAlunos, linha);
             }
         }
     }//GEN-LAST:event_ExcluirActionPerformed

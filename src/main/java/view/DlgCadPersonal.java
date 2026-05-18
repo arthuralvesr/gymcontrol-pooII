@@ -377,10 +377,13 @@ public class DlgCadPersonal extends javax.swing.JDialog {
         String cpf = txtCpf.getText();
         String telefone = txtTelefone.getText();
         String email = txtEmail.getText();
-        if (groupSexo.getSelection().getMnemonic() == 'M') {
-            String sexo = "Masculino";
-        } else {
-            String sexo = "Feminino";
+        String sexo = "";
+        if (groupSexo.getSelection() != null) {
+            if (groupSexo.getSelection().getMnemonic() == 'M') {
+                sexo = "Masculino";
+            } else {
+                sexo = "Feminino";
+            }
         }
         
         
@@ -391,15 +394,17 @@ public class DlgCadPersonal extends javax.swing.JDialog {
         
         String dataContratacao = txtDataContratacao.getText();
         String status = "";
-        if (groupStatus.getSelection().getMnemonic() == 'A') {
-            status = "Ativo";
-        } else {
-            status = "Inativo";
+        if (groupStatus.getSelection() != null) {
+            if (groupStatus.getSelection().getMnemonic() == 'A') {
+                status = "Ativo";
+            } else {
+                status = "Inativo";
+            }
         }
         
         String obs = txtObs.getText();
         
-        Personal personal = controller.criarPersonal(nome, dataN, cpf, telefone, email, "",
+        Personal personal = controller.criarPersonal(nome, dataN, cpf, telefone, email, sexo,
                 cref, especialidade, turno, dataContratacao, status, obs);
         controller.salvarPersonal(tabela, personal, linhaEd);
     }//GEN-LAST:event_btnSalvarActionPerformed
