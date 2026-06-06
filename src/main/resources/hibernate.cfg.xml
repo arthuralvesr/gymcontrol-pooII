@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!DOCTYPE hibernate-configuration PUBLIC
+"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+
+        <!-- Driver PostgreSQL -->
+        <property name="hibernate.connection.driver_class">
+            org.postgresql.Driver
+        </property>
+
+        <!-- Banco -->
+        <property name="hibernate.connection.url">
+            jdbc:postgresql://localhost:5432/gymcontrol
+        </property>
+
+        <!-- Usuário -->
+        <property name="hibernate.connection.username">
+            postgres
+        </property>
+
+        <!-- Senha -->
+        <property name="hibernate.connection.password">
+            postgres
+        </property>
+
+        <!-- Atualiza tabelas automaticamente -->
+        <property name="hibernate.hbm2ddl.auto">
+            update
+        </property>
+
+        <!-- Mostrar SQL -->
+        <property name="show_sql">
+            false
+        </property>
+
+        <mapping class="model.Aluno"/>
+        <mapping class="model.Personal"/>
+        <mapping class="model.DivisaoTreino"/>
+        <mapping class="model.Exercicio"/>
+        <mapping class="model.FichaTreino"/>
+        <mapping class="model.ExercicioFicha"/>
+
+    </session-factory>
+</hibernate-configuration>
