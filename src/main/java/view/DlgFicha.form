@@ -27,10 +27,34 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="103" alignment="1" groupAlignment="0" attributes="0">
+                  <Component id="tblTreino" max="32767" attributes="0"/>
+                  <Group type="102" attributes="0">
                       <Component id="lblTitulo" min="-2" max="-2" attributes="0"/>
-                      <Component id="tblTreino" min="-2" pref="423" max="-2" attributes="0"/>
-                      <Component id="pnlBuscarAluno" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="538" max="32767" attributes="0"/>
+                  </Group>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+          </Group>
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace min="-2" pref="152" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="lblDataInicio" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblPersonal" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="txtDataInicio" min="-2" pref="93" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="lblPrevisaoTroca" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Component id="txtPersonal" max="32767" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <Group type="103" alignment="0" groupAlignment="1" attributes="0">
+                      <Component id="txtPrevisaoTroca" alignment="1" min="-2" pref="113" max="-2" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="lblDivisaoTreino" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
@@ -38,29 +62,8 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="btnCadastrarDivisao" min="-2" pref="33" max="-2" attributes="0"/>
                       </Group>
-                      <Group type="102" alignment="0" attributes="0">
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="lblDataInicio" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="lblPersonal" alignment="0" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="txtDataInicio" min="-2" pref="93" max="-2" attributes="0"/>
-                                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                                  <Component id="lblPrevisaoTroca" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="txtPrevisaoTroca" min="-2" pref="93" max="-2" attributes="0"/>
-                              </Group>
-                              <Component id="txtPersonal" min="-2" pref="324" max="-2" attributes="0"/>
-                          </Group>
-                      </Group>
                   </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="154" max="-2" attributes="0"/>
-                      <Component id="lblTitulo1" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="192" max="-2" attributes="0"/>
-                  </Group>
+                  <Component id="pnlBuscarAluno" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
@@ -91,9 +94,7 @@
                   <Component id="cmbDivisaoTreino" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnCadastrarDivisao" alignment="3" min="-2" pref="24" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Component id="lblTitulo1" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
               <Component id="tblTreino" min="-2" pref="130" max="-2" attributes="0"/>
               <EmptySpace pref="92" max="32767" attributes="0"/>
           </Group>
@@ -117,12 +118,12 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="lblAluno" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="txtAluno" min="-2" pref="275" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="txtAluno" min="-2" pref="250" max="-2" attributes="0"/>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Component id="btnBuscarAluno" min="-2" pref="36" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnCadastrarAluno" min="-2" pref="36" max="-2" attributes="0"/>
-                  <EmptySpace pref="16" max="32767" attributes="0"/>
+                  <EmptySpace pref="13" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -130,11 +131,13 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="txtAluno" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="lblAluno" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnBuscarAluno" alignment="3" min="-2" pref="24" max="-2" attributes="0"/>
-                      <Component id="btnCadastrarAluno" alignment="3" min="-2" pref="24" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="btnBuscarAluno" alignment="0" min="-2" pref="24" max="-2" attributes="0"/>
+                      <Component id="btnCadastrarAluno" alignment="1" min="-2" pref="24" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="txtAluno" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblAluno" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace pref="16" max="32767" attributes="0"/>
               </Group>
@@ -155,6 +158,9 @@
               <Image iconType="3" name="/Resource/images/search.png"/>
             </Property>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnBuscarAlunoActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnCadastrarAluno">
           <Properties>
@@ -179,8 +185,11 @@
           <StringArray count="0"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtPersonalActionPerformed"/>
+      </Events>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Object&gt;"/>
       </AuxValues>
     </Component>
     <Component class="javax.swing.JLabel" name="lblDataInicio">
@@ -188,8 +197,11 @@
         <Property name="text" type="java.lang.String" value="Data de inicio"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="txtDataInicio">
+    <Component class="javax.swing.JFormattedTextField" name="txtDataInicio">
       <Properties>
+        <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor" preCode="try {" postCode="} catch (java.text.ParseException ex) {&#xa;ex.printStackTrace();&#xa;}">
+          <Format format="##/##/####" subtype="-1" type="5"/>
+        </Property>
         <Property name="toolTipText" type="java.lang.String" value=""/>
       </Properties>
     </Component>
@@ -198,8 +210,11 @@
         <Property name="text" type="java.lang.String" value="Pervisao de troca"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="txtPrevisaoTroca">
+    <Component class="javax.swing.JFormattedTextField" name="txtPrevisaoTroca">
       <Properties>
+        <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor" preCode="try {" postCode="} catch (java.text.ParseException ex) {&#xa;ex.printStackTrace();&#xa;}">
+          <Format format="##/##/####" subtype="-1" type="5"/>
+        </Property>
         <Property name="toolTipText" type="java.lang.String" value=""/>
       </Properties>
     </Component>
@@ -211,17 +226,14 @@
     <Component class="javax.swing.JComboBox" name="cmbDivisaoTreino">
       <Properties>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-          <StringArray count="5">
-            <StringItem index="0" value="ABC"/>
-            <StringItem index="1" value="ABCD"/>
-            <StringItem index="2" value="UP LOW"/>
-            <StringItem index="3" value="ABC UP"/>
-            <StringItem index="4" value=" "/>
-          </StringArray>
+          <StringArray count="0"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbDivisaoTreinoActionPerformed"/>
+      </Events>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Object&gt;"/>
       </AuxValues>
     </Component>
     <Component class="javax.swing.JButton" name="btnCadastrarDivisao">
@@ -234,11 +246,6 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCadastrarDivisaoActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JLabel" name="lblTitulo1">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Titulo treino 1"/>
-      </Properties>
-    </Component>
     <Container class="javax.swing.JScrollPane" name="tblTreino">
       <AuxValues>
         <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
@@ -249,7 +256,7 @@
         <Component class="javax.swing.JTable" name="jTable1">
           <Properties>
             <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-              <Table columnCount="4" rowCount="4">
+              <Table columnCount="4" rowCount="0">
                 <Column editable="true" title="Exercicio" type="java.lang.Object"/>
                 <Column editable="true" title="Series" type="java.lang.Integer"/>
                 <Column editable="true" title="Repeticoes" type="java.lang.Integer"/>

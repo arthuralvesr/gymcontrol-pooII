@@ -1,18 +1,68 @@
 package view;
 
-import controller.AlunoController;
+import controller.GerenciadorDominio;
 import controller.GerInterGrafica;
-import model.Ficha;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.JButton;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JLabel;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingWorker;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.event.TableModelEvent;
+import model.Aluno;
+import model.Exercicio;
+import model.ExercicioFicha;
+import model.FichaTreino;
+import model.Personal;
+import model.enums.DiaTreino;
+import model.enums.Status;
+import model.enums.TipoTreino;
 
 public class DlgFicha extends javax.swing.JDialog {
 
-    private final AlunoController alunoController;
-    private Ficha ficha;
+    private GerenciadorDominio gerenciadorDominio;
+    private FichaTreino ficha;
+    private Aluno alunoSelecionado;
+    private List<Personal> personais = List.of();
+    private boolean personaisCarregados;
+    private final Map<String, JTable> tabelasTreino = new LinkedHashMap<>();
+    private final Map<String, DiaTreino> diasTreinoPorTitulo = new LinkedHashMap<>();
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private JTabbedPane abasTreino;
+    private JButton btnAdicionarExercicioTreino;
+    private JButton btnRemoverLinhaTreino;
+    private JLabel lblResumoTreino;
+    private javax.swing.JButton btnSalvarFicha;
 
     public DlgFicha(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        this.alunoController = new AlunoController();
+        ficha = new FichaTreino();
         initComponents();
+        configurarAreaTreinos();
+        configurarComboPersonal();
+        configurarComboDivisaoTreino();
+        configurarCarregamentoInicial();
+        btnCadastrarDivisao.setVisible(false);
+        atualizarDivisaoSelecionada();
+        setMinimumSize(new Dimension(1140, 700));
     }
 
     /**
@@ -32,16 +82,16 @@ public class DlgFicha extends javax.swing.JDialog {
         lblPersonal = new javax.swing.JLabel();
         txtPersonal = new javax.swing.JComboBox<>();
         lblDataInicio = new javax.swing.JLabel();
-        txtDataInicio = new javax.swing.JTextField();
+        txtDataInicio = new javax.swing.JFormattedTextField();
         lblPrevisaoTroca = new javax.swing.JLabel();
-        txtPrevisaoTroca = new javax.swing.JTextField();
+        txtPrevisaoTroca = new javax.swing.JFormattedTextField();
         lblDivisaoTreino = new javax.swing.JLabel();
         cmbDivisaoTreino = new javax.swing.JComboBox<>();
         btnCadastrarDivisao = new javax.swing.JButton();
-        lblTitulo1 = new javax.swing.JLabel();
         tblTreino = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         lblTitulo = new javax.swing.JLabel();
+        btnSalvarFicha = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Cadastro de Ficha | GYMCONTROL");
@@ -51,6 +101,11 @@ public class DlgFicha extends javax.swing.JDialog {
         lblAluno.setText("Aluno");
 
         btnBuscarAluno.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Resource/images/search.png"))); // NOI18N
+        btnBuscarAluno.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBuscarAlunoActionPerformed(evt);
+            }
+        });
 
         btnCadastrarAluno.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Resource/images/user-add.png"))); // NOI18N
         btnCadastrarAluno.addActionListener(new java.awt.event.ActionListener() {
@@ -67,38 +122,59 @@ public class DlgFicha extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(lblAluno)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtAluno, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtAluno, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnBuscarAluno, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnCadastrarAluno, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addContainerGap(13, Short.MAX_VALUE))
         );
         pnlBuscarAlunoLayout.setVerticalGroup(
             pnlBuscarAlunoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlBuscarAlunoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlBuscarAlunoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtAluno, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblAluno)
+                .addGroup(pnlBuscarAlunoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnBuscarAluno, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnCadastrarAluno, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnCadastrarAluno, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(pnlBuscarAlunoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtAluno, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblAluno)))
                 .addContainerGap(16, Short.MAX_VALUE))
         );
 
         lblPersonal.setText("Personal");
 
+        txtPersonal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPersonalActionPerformed(evt);
+            }
+        });
+
         lblDataInicio.setText("Data de inicio");
 
+        try {
+            txtDataInicio.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
         txtDataInicio.setToolTipText("");
 
         lblPrevisaoTroca.setText("Pervisao de troca");
 
+        try {
+            txtPrevisaoTroca.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
         txtPrevisaoTroca.setToolTipText("");
 
         lblDivisaoTreino.setText("Divisao Treino");
 
-        cmbDivisaoTreino.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ABC", "ABCD", "UP LOW", "ABC UP", " " }));
+        cmbDivisaoTreino.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbDivisaoTreinoActionPerformed(evt);
+            }
+        });
 
         btnCadastrarDivisao.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Resource/images/plus.png"))); // NOI18N
         btnCadastrarDivisao.addActionListener(new java.awt.event.ActionListener() {
@@ -107,14 +183,9 @@ public class DlgFicha extends javax.swing.JDialog {
             }
         });
 
-        lblTitulo1.setText("Titulo treino 1");
-
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
                 "Exercicio", "Series", "Repeticoes", "Descanso"
@@ -134,6 +205,13 @@ public class DlgFicha extends javax.swing.JDialog {
         lblTitulo.setForeground(new java.awt.Color(10, 132, 255));
         lblTitulo.setText("Ficha de treino");
 
+        btnSalvarFicha.setText("Salvar ficha");
+        btnSalvarFicha.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSalvarFichaActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -141,33 +219,35 @@ public class DlgFicha extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(tblTreino)
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(lblTitulo)
-                        .addComponent(tblTreino, javax.swing.GroupLayout.PREFERRED_SIZE, 423, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(pnlBuscarAluno, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 538, Short.MAX_VALUE))
+                    .addComponent(btnSalvarFicha, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addGap(152, 152, 152)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblDataInicio)
+                            .addComponent(lblPersonal))
+                        .addGap(11, 11, 11)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(txtDataInicio, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(lblPrevisaoTroca))
+                            .addComponent(txtPersonal, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(txtPrevisaoTroca, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                             .addComponent(lblDivisaoTreino)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addComponent(cmbDivisaoTreino, javax.swing.GroupLayout.PREFERRED_SIZE, 285, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(btnCadastrarDivisao, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(layout.createSequentialGroup()
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(lblDataInicio)
-                                .addComponent(lblPersonal))
-                            .addGap(11, 11, 11)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(txtDataInicio, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(lblPrevisaoTroca)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(txtPrevisaoTroca, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addComponent(txtPersonal, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(154, 154, 154)
-                        .addComponent(lblTitulo1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 192, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(btnCadastrarDivisao, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(pnlBuscarAluno, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -192,23 +272,707 @@ public class DlgFicha extends javax.swing.JDialog {
                     .addComponent(lblDivisaoTreino)
                     .addComponent(cmbDivisaoTreino, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnCadastrarDivisao, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(lblTitulo1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(40, 40, 40)
                 .addComponent(tblTreino, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(92, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnSalvarFicha)
+                .addContainerGap(59, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCadastrarAlunoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarAlunoActionPerformed
-        GerInterGrafica.getMyInstance().abrirCadAluno(null, null);
+        Aluno aluno = GerInterGrafica.getMyInstance().abrirCadAluno((java.awt.Frame) getOwner(), null);
+        atualizarAlunoSelecionado(aluno);
     }//GEN-LAST:event_btnCadastrarAlunoActionPerformed
 
     private void btnCadastrarDivisaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarDivisaoActionPerformed
-        GerInterGrafica.getMyInstance().abrirCadDivisao();
     }//GEN-LAST:event_btnCadastrarDivisaoActionPerformed
+
+    private void btnBuscarAlunoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarAlunoActionPerformed
+        String filtroNome = txtAluno.getText().trim();
+
+        try {
+            Aluno aluno = GerInterGrafica.getMyInstance()
+                    .abrirBuscaAluno((java.awt.Frame) getOwner(), filtroNome);
+            if (aluno == null) {
+                return;
+            }
+
+            atualizarAlunoSelecionado(aluno);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao buscar alunos: " + ex.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnBuscarAlunoActionPerformed
+
+    private void cmbDivisaoTreinoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbDivisaoTreinoActionPerformed
+        atualizarDivisaoSelecionada();
+    }//GEN-LAST:event_cmbDivisaoTreinoActionPerformed
+
+    private void txtPersonalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPersonalActionPerformed
+        atualizarPersonalSelecionado();
+    }//GEN-LAST:event_txtPersonalActionPerformed
+
+    private void btnSalvarFichaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarFichaActionPerformed
+        salvarFicha();
+    }//GEN-LAST:event_btnSalvarFichaActionPerformed
+
+    private void atualizarAlunoSelecionado(Aluno aluno) {
+        if (aluno == null) {
+            return;
+        }
+
+        alunoSelecionado = aluno;
+        txtAluno.setText(aluno.getNome());
+
+        if (ficha != null) {
+            ficha.setAluno(alunoSelecionado);
+        }
+    }
+
+    private void configurarComboPersonal() {
+        txtPersonal.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public java.awt.Component getListCellRendererComponent(
+                    javax.swing.JList<?> list,
+                    Object value,
+                    int index,
+                    boolean isSelected,
+                    boolean cellHasFocus) {
+                Object texto = value;
+                if (value instanceof Personal personal) {
+                    texto = personal.getNome();
+                }
+                return super.getListCellRendererComponent(list, texto, index, isSelected, cellHasFocus);
+            }
+        });
+    }
+
+    private void configurarComboDivisaoTreino() {
+        cmbDivisaoTreino.setModel(new DefaultComboBoxModel<>(TipoTreino.values()));
+        cmbDivisaoTreino.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public java.awt.Component getListCellRendererComponent(
+                    javax.swing.JList<?> list,
+                    Object value,
+                    int index,
+                    boolean isSelected,
+                    boolean cellHasFocus) {
+                Object texto = value;
+                if (value instanceof TipoTreino tipoTreino) {
+                    texto = formatarTipoTreino(tipoTreino);
+                }
+                return super.getListCellRendererComponent(list, texto, index, isSelected, cellHasFocus);
+            }
+        });
+        if (cmbDivisaoTreino.getItemCount() > 0) {
+            cmbDivisaoTreino.setSelectedIndex(0);
+        }
+    }
+
+    private void atualizarPersonalSelecionado() {
+        Object selecionado = txtPersonal.getSelectedItem();
+        if (selecionado instanceof Personal personal && ficha != null) {
+            ficha.setPersonal(personal);
+        }
+    }
+
+    private void atualizarDivisaoSelecionada() {
+        Object selecionado = cmbDivisaoTreino.getSelectedItem();
+        if (selecionado instanceof TipoTreino tipoTreino) {
+            montarTabelasTreino(tipoTreino);
+            sincronizarExerciciosFicha();
+        }
+    }
+
+    private void configurarCarregamentoInicial() {
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                carregarPersonais();
+            }
+        });
+    }
+
+    private void carregarPersonais() {
+        if (personaisCarregados) {
+            return;
+        }
+        personaisCarregados = true;
+        txtPersonal.setEnabled(false);
+        txtPersonal.setModel(new DefaultComboBoxModel<>());
+
+        new SwingWorker<List<Personal>, Void>() {
+            private Exception erro;
+
+            @Override
+            protected List<Personal> doInBackground() {
+                try {
+                    @SuppressWarnings("unchecked")
+                    List<Personal> carregados = getGerenciadorDominio().listar(Personal.class);
+                    return carregados;
+                } catch (Exception ex) {
+                    erro = ex;
+                    return List.of();
+                }
+            }
+
+            @Override
+            protected void done() {
+                if (erro != null) {
+                    txtPersonal.setModel(new DefaultComboBoxModel<>());
+                    JOptionPane.showMessageDialog(DlgFicha.this,
+                            "Erro ao carregar personais: " + erro.getMessage(),
+                            "Erro",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                try {
+                    personais = get();
+                    if (personais.isEmpty()) {
+                        txtPersonal.setModel(new DefaultComboBoxModel<>());
+                        txtPersonal.setEnabled(false);
+                    } else {
+                        txtPersonal.setModel(new DefaultComboBoxModel<>(personais.toArray(Personal[]::new)));
+                        txtPersonal.setEnabled(true);
+                        atualizarPersonalSelecionado();
+                    }
+                } catch (Exception ex) {
+                    txtPersonal.setModel(new DefaultComboBoxModel<>());
+                }
+            }
+        }.execute();
+    }
+
+    private String formatarTipoTreino(TipoTreino tipoTreino) {
+        return switch (tipoTreino) {
+            case UPPER_LOWER -> "Upper/Lower";
+            case FULL_BODY -> "Full Body";
+            default -> tipoTreino.name();
+        };
+    }
+
+    private void configurarAreaTreinos() {
+        btnAdicionarExercicioTreino = new JButton("Adicionar exercicio");
+        btnAdicionarExercicioTreino.addActionListener(evt -> adicionarExercicioNaTabelaAtual());
+
+        btnRemoverLinhaTreino = new JButton("Remover linha");
+        btnRemoverLinhaTreino.addActionListener(evt -> removerLinhaDaTabelaAtual());
+
+        lblResumoTreino = new JLabel("Selecione a aba do treino e adicione os exercicios da ficha.");
+
+        JPanel acoes = new JPanel(new BorderLayout(12, 0));
+        JPanel botoes = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        botoes.add(btnAdicionarExercicioTreino);
+        botoes.add(btnRemoverLinhaTreino);
+        acoes.add(lblResumoTreino, BorderLayout.WEST);
+        acoes.add(botoes, BorderLayout.EAST);
+
+        abasTreino = new JTabbedPane();
+        abasTreino.setPreferredSize(new Dimension(1040, 320));
+
+        JPanel conteudoTreinos = new JPanel(new BorderLayout(0, 12));
+        conteudoTreinos.add(acoes, BorderLayout.NORTH);
+        conteudoTreinos.add(abasTreino, BorderLayout.CENTER);
+
+        tblTreino.setBorder(javax.swing.BorderFactory.createTitledBorder("Exercicios da ficha"));
+        tblTreino.setViewportView(conteudoTreinos);
+        tblTreino.getVerticalScrollBar().setUnitIncrement(16);
+    }
+
+    private void montarTabelasTreino(TipoTreino tipoTreino) {
+        if (abasTreino == null) {
+            return;
+        }
+
+        abasTreino.removeAll();
+        tabelasTreino.clear();
+        diasTreinoPorTitulo.clear();
+
+        List<String> nomesTreino = obterNomesTreino(tipoTreino);
+        List<DiaTreino> diasTreino = obterDiasTreino(tipoTreino);
+
+        for (int i = 0; i < nomesTreino.size(); i++) {
+            String nomeTreino = nomesTreino.get(i);
+            JTable tabela = criarTabelaTreino();
+            tabelasTreino.put(nomeTreino, tabela);
+            diasTreinoPorTitulo.put(nomeTreino, diasTreino.get(i));
+            abasTreino.addTab(nomeTreino, new JScrollPane(tabela));
+        }
+
+        atualizarResumoTreino(tipoTreino, nomesTreino.size());
+        abasTreino.revalidate();
+        abasTreino.repaint();
+    }
+
+    private List<String> obterNomesTreino(TipoTreino tipoTreino) {
+        return switch (tipoTreino) {
+            case AB -> List.of("Treino A", "Treino B");
+            case ABC -> List.of("Treino A", "Treino B", "Treino C");
+            case ABCD -> List.of("Treino A", "Treino B", "Treino C", "Treino D");
+            case ABCDE -> List.of("Treino A", "Treino B", "Treino C", "Treino D", "Treino E");
+            case UPPER_LOWER -> List.of("Upper", "Lower");
+            case FULL_BODY -> List.of("Full Body");
+        };
+    }
+
+    private List<DiaTreino> obterDiasTreino(TipoTreino tipoTreino) {
+        return switch (tipoTreino) {
+            case AB -> List.of(DiaTreino.A, DiaTreino.B);
+            case ABC -> List.of(DiaTreino.A, DiaTreino.B, DiaTreino.C);
+            case ABCD -> List.of(DiaTreino.A, DiaTreino.B, DiaTreino.C, DiaTreino.D);
+            case ABCDE -> List.of(DiaTreino.A, DiaTreino.B, DiaTreino.C, DiaTreino.D, DiaTreino.E);
+            case UPPER_LOWER -> List.of(DiaTreino.A, DiaTreino.B);
+            case FULL_BODY -> List.of(DiaTreino.A);
+        };
+    }
+
+    private JTable criarTabelaTreino() {
+        DefaultTableModel model = new DefaultTableModel(
+                new Object[][]{},
+                new String[]{"Exercicio", "Series", "Repeticoes", "Carga", "Descanso", "Observacoes"}) {
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                return switch (columnIndex) {
+                    case 0 -> Exercicio.class;
+                    case 1, 2, 4 -> Integer.class;
+                    case 3 -> Double.class;
+                    default -> String.class;
+                };
+            }
+        };
+
+        JTable tabela = new JTable(model);
+        tabela.setRowHeight(28);
+        tabela.setFillsViewportHeight(true);
+        tabela.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        tabela.getColumnModel().getColumn(0).setPreferredWidth(260);
+        tabela.getColumnModel().getColumn(1).setPreferredWidth(90);
+        tabela.getColumnModel().getColumn(2).setPreferredWidth(110);
+        tabela.getColumnModel().getColumn(3).setPreferredWidth(90);
+        tabela.getColumnModel().getColumn(4).setPreferredWidth(95);
+        tabela.getColumnModel().getColumn(5).setPreferredWidth(320);
+        tabela.setDefaultRenderer(Exercicio.class, new DefaultTableCellRenderer() {
+            @Override
+            protected void setValue(Object value) {
+                if (value instanceof Exercicio exercicio) {
+                    super.setValue(exercicio.getNome());
+                    return;
+                }
+                super.setValue(value);
+            }
+        });
+        model.addRow(criarLinhaVazia());
+        model.addTableModelListener(event -> {
+            ajustarLinhasTabela(model, event);
+            sincronizarExerciciosFicha();
+        });
+        return tabela;
+    }
+
+    private void adicionarExercicioNaTabelaAtual() {
+        JTable tabela = obterTabelaAtual();
+        if (tabela == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Selecione um treino para adicionar o exercicio.",
+                    "Treino",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Exercicio exercicio = GerInterGrafica.getMyInstance()
+                .abrirBuscaExercicio((java.awt.Frame) getOwner(), "");
+        if (exercicio == null || !(tabela.getModel() instanceof DefaultTableModel model)) {
+            return;
+        }
+
+        int linhaDestino = obterLinhaDestinoParaInsercao(tabela, model);
+
+        model.setValueAt(exercicio, linhaDestino, 0);
+        tabela.setRowSelectionInterval(linhaDestino, linhaDestino);
+        tabela.requestFocusInWindow();
+        tabela.changeSelection(linhaDestino, 1, false, false);
+        sincronizarExerciciosFicha();
+    }
+
+    private void removerLinhaDaTabelaAtual() {
+        JTable tabela = obterTabelaAtual();
+        if (tabela == null) {
+            return;
+        }
+
+        int linhaSelecionada = tabela.getSelectedRow();
+        if (linhaSelecionada < 0 || !(tabela.getModel() instanceof DefaultTableModel model)) {
+            return;
+        }
+
+        if (model.getRowCount() == 1) {
+            limparLinha(model, 0);
+            sincronizarExerciciosFicha();
+            return;
+        }
+
+        model.removeRow(linhaSelecionada);
+        sincronizarExerciciosFicha();
+    }
+
+    private boolean linhaPossuiConteudo(DefaultTableModel model, int linha) {
+        for (int coluna = 0; coluna < model.getColumnCount(); coluna++) {
+            if (model.getValueAt(linha, coluna) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void limparLinha(DefaultTableModel model, int linha) {
+        for (int coluna = 0; coluna < model.getColumnCount(); coluna++) {
+            model.setValueAt(null, linha, coluna);
+        }
+    }
+
+    private void ajustarLinhasTabela(DefaultTableModel model, TableModelEvent event) {
+        if (event.getType() != TableModelEvent.UPDATE || model.getRowCount() == 0) {
+            return;
+        }
+
+        int ultimaLinha = model.getRowCount() - 1;
+        if (linhaPossuiConteudo(model, ultimaLinha)) {
+            model.addRow(criarLinhaVazia());
+            return;
+        }
+
+        while (model.getRowCount() > 1) {
+            int penultimaLinha = model.getRowCount() - 2;
+            if (linhaPossuiConteudo(model, penultimaLinha)) {
+                break;
+            }
+            model.removeRow(model.getRowCount() - 1);
+        }
+    }
+
+    private Object[] criarLinhaVazia() {
+        return new Object[]{null, null, null, null, null, null};
+    }
+
+    private int obterLinhaDestinoParaInsercao(JTable tabela, DefaultTableModel model) {
+        int linhaSelecionada = tabela.getSelectedRow();
+        if (linhaSelecionada >= 0 && model.getValueAt(linhaSelecionada, 0) == null) {
+            return linhaSelecionada;
+        }
+
+        for (int linha = 0; linha < model.getRowCount(); linha++) {
+            if (model.getValueAt(linha, 0) == null) {
+                return linha;
+            }
+        }
+
+        model.addRow(criarLinhaVazia());
+        return model.getRowCount() - 1;
+    }
+
+    private JTable obterTabelaAtual() {
+        int indiceAba = abasTreino.getSelectedIndex();
+        if (indiceAba < 0) {
+            return null;
+        }
+
+        String titulo = abasTreino.getTitleAt(indiceAba);
+        return tabelasTreino.get(titulo);
+    }
+
+    private void sincronizarExerciciosFicha() {
+        if (ficha == null) {
+            return;
+        }
+
+        List<ExercicioFicha> exercicios = new ArrayList<>();
+
+        for (Map.Entry<String, JTable> entry : tabelasTreino.entrySet()) {
+            DiaTreino diaTreino = diasTreinoPorTitulo.get(entry.getKey());
+            if (diaTreino == null) {
+                continue;
+            }
+
+            JTable tabela = entry.getValue();
+            if (!(tabela.getModel() instanceof DefaultTableModel model)) {
+                continue;
+            }
+
+            int ordemDia = 1;
+            for (int linha = 0; linha < model.getRowCount(); linha++) {
+                Object exercicioValor = model.getValueAt(linha, 0);
+                if (!(exercicioValor instanceof Exercicio exercicio)) {
+                    continue;
+                }
+
+                ExercicioFicha exercicioFicha = new ExercicioFicha();
+                exercicioFicha.setFichaTreino(ficha);
+                exercicioFicha.setDiaTreino(diaTreino);
+                exercicioFicha.setExercicio(exercicio);
+                exercicioFicha.setSeries(lerInteger(model.getValueAt(linha, 1)));
+                exercicioFicha.setRepeticoes(lerInteger(model.getValueAt(linha, 2)));
+                exercicioFicha.setCarga(lerDouble(model.getValueAt(linha, 3)));
+                exercicioFicha.setDescanso(lerInteger(model.getValueAt(linha, 4)));
+                exercicioFicha.setObservacoes(lerTexto(model.getValueAt(linha, 5)));
+                exercicioFicha.setOrdemExercicio(ordemDia++);
+                exercicios.add(exercicioFicha);
+            }
+        }
+
+        ficha.setExerciciosFicha(exercicios);
+        if (lblResumoTreino != null) {
+            lblResumoTreino.setText("Exercicios na ficha: " + exercicios.size());
+        }
+    }
+
+    private void salvarFicha() {
+        try {
+            sincronizarExerciciosFicha();
+
+            if (alunoSelecionado == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Selecione um aluno para a ficha.",
+                        "Validacao",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Object personalSelecionado = txtPersonal.getSelectedItem();
+            if (!(personalSelecionado instanceof Personal personal)) {
+                JOptionPane.showMessageDialog(this,
+                        "Selecione um personal para a ficha.",
+                        "Validacao",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Object tipoSelecionado = cmbDivisaoTreino.getSelectedItem();
+            if (!(tipoSelecionado instanceof TipoTreino tipoTreino)) {
+                JOptionPane.showMessageDialog(this,
+                        "Selecione a divisao de treino.",
+                        "Validacao",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            LocalDate dataInicio = lerDataObrigatoria(txtDataInicio.getText(), "Data de inicio");
+            String previsaoTroca = lerTextoFormatado(txtPrevisaoTroca.getText());
+
+            if (ficha.getExerciciosFicha() == null || ficha.getExerciciosFicha().isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Adicione pelo menos um exercicio na ficha.",
+                        "Validacao",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            validarExerciciosFicha();
+
+            btnSalvarFicha.setEnabled(false);
+
+            new SwingWorker<FichaTreino, Void>() {
+                private Exception erro;
+
+                @Override
+                protected FichaTreino doInBackground() {
+                    try {
+                        model.DivisaoTreino divisaoTreino = obterOuCriarDivisaoTreino(tipoTreino);
+                        String nomeFicha = montarNomeFicha(alunoSelecionado, tipoTreino, dataInicio);
+                        String objetivoFicha = alunoSelecionado.getObjetivos() == null
+                                ? null
+                                : String.join(", ", alunoSelecionado.getObjetivos());
+                        String observacoes = previsaoTroca == null
+                                ? null
+                                : "Previsao de troca: " + previsaoTroca;
+
+                        FichaTreino fichaSalva = getGerenciadorDominio().inserirFichaTreino(
+                                nomeFicha,
+                                dataInicio,
+                                objetivoFicha,
+                                observacoes,
+                                Status.ATIVO,
+                                alunoSelecionado,
+                                personal,
+                                divisaoTreino);
+
+                        for (ExercicioFicha exercicioFicha : ficha.getExerciciosFicha()) {
+                            getGerenciadorDominio().inserirExercicioFicha(
+                                    exercicioFicha.getDiaTreino(),
+                                    exercicioFicha.getSeries(),
+                                    exercicioFicha.getRepeticoes(),
+                                    exercicioFicha.getCarga(),
+                                    exercicioFicha.getDescanso(),
+                                    exercicioFicha.getOrdemExercicio(),
+                                    exercicioFicha.getObservacoes(),
+                                    fichaSalva,
+                                    exercicioFicha.getExercicio());
+                        }
+
+                        return fichaSalva;
+                    } catch (Exception ex) {
+                        erro = ex;
+                        return null;
+                    }
+                }
+
+                @Override
+                protected void done() {
+                    btnSalvarFicha.setEnabled(true);
+
+                    if (erro != null) {
+                        JOptionPane.showMessageDialog(DlgFicha.this,
+                                "Erro ao salvar ficha: " + erro.getMessage(),
+                                "Erro",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    try {
+                        ficha = get();
+                        JOptionPane.showMessageDialog(DlgFicha.this,
+                                "Ficha salva com sucesso.",
+                                "Sucesso",
+                                JOptionPane.INFORMATION_MESSAGE);
+                        dispose();
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(DlgFicha.this,
+                                "Erro ao finalizar salvamento da ficha.",
+                                "Erro",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }.execute();
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(this,
+                    ex.getMessage(),
+                    "Validacao",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void validarExerciciosFicha() {
+        for (ExercicioFicha exercicioFicha : ficha.getExerciciosFicha()) {
+            if (exercicioFicha.getSeries() == null
+                    || exercicioFicha.getRepeticoes() == null
+                    || exercicioFicha.getCarga() == null
+                    || exercicioFicha.getDescanso() == null) {
+                throw new IllegalArgumentException(
+                        "Preencha series, repeticoes, carga e descanso para todos os exercicios.");
+            }
+        }
+    }
+
+    private LocalDate lerDataObrigatoria(String valor, String nomeCampo) {
+        String texto = lerTextoFormatado(valor);
+        if (texto == null) {
+            throw new IllegalArgumentException(nomeCampo + " e obrigatoria.");
+        }
+
+        try {
+            return LocalDate.parse(texto, dateFormatter);
+        } catch (DateTimeParseException ex) {
+            throw new IllegalArgumentException(nomeCampo + " invalida.");
+        }
+    }
+
+    private String lerTextoFormatado(String valor) {
+        if (valor == null) {
+            return null;
+        }
+
+        String texto = valor.replace('_', ' ').trim();
+        return texto.isBlank() ? null : texto;
+    }
+
+    private String montarNomeFicha(Aluno aluno, TipoTreino tipoTreino, LocalDate dataInicio) {
+        return "Ficha " + aluno.getNome() + " - " + formatarTipoTreino(tipoTreino) + " - " + dataInicio;
+    }
+
+    private model.DivisaoTreino obterOuCriarDivisaoTreino(TipoTreino tipoTreino) {
+        @SuppressWarnings("unchecked")
+        List<model.DivisaoTreino> divisoes = getGerenciadorDominio().listar(model.DivisaoTreino.class);
+        for (model.DivisaoTreino divisao : divisoes) {
+            if (divisao.getTipoTreino() == tipoTreino) {
+                return divisao;
+            }
+        }
+
+        return getGerenciadorDominio().inserirDivisaoTreino(
+                tipoTreino,
+                obterNomesTreino(tipoTreino).size(),
+                "Divisao criada automaticamente pela ficha");
+    }
+
+    private void atualizarResumoTreino(TipoTreino tipoTreino, int quantidadeTabelas) {
+        if (lblResumoTreino == null) {
+            return;
+        }
+        lblResumoTreino.setText(formatarTipoTreino(tipoTreino)
+                + " | " + quantidadeTabelas + " treino(s) | Exercicio na aba atual");
+    }
+
+    private Integer lerInteger(Object valor) {
+        if (valor == null) {
+            return null;
+        }
+        if (valor instanceof Integer inteiro) {
+            return inteiro;
+        }
+
+        String texto = valor.toString().trim();
+        if (texto.isEmpty()) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(texto);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private Double lerDouble(Object valor) {
+        if (valor == null) {
+            return null;
+        }
+        if (valor instanceof Double decimal) {
+            return decimal;
+        }
+        if (valor instanceof Number numero) {
+            return numero.doubleValue();
+        }
+
+        String texto = valor.toString().trim().replace(',', '.');
+        if (texto.isEmpty()) {
+            return null;
+        }
+        try {
+            return Double.valueOf(texto);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private String lerTexto(Object valor) {
+        if (valor == null) {
+            return null;
+        }
+
+        String texto = valor.toString().trim();
+        return texto.isEmpty() ? null : texto;
+    }
+
+    private GerenciadorDominio getGerenciadorDominio() {
+        if (gerenciadorDominio == null) {
+            gerenciadorDominio = new GerenciadorDominio();
+        }
+        return gerenciadorDominio;
+    }
 
     /**
      * @param args the command line arguments
@@ -257,7 +1021,7 @@ public class DlgFicha extends javax.swing.JDialog {
     private javax.swing.JButton btnBuscarAluno;
     private javax.swing.JButton btnCadastrarAluno;
     private javax.swing.JButton btnCadastrarDivisao;
-    private javax.swing.JComboBox<String> cmbDivisaoTreino;
+    private javax.swing.JComboBox<Object> cmbDivisaoTreino;
     private javax.swing.JTable jTable1;
     private javax.swing.JLabel lblAluno;
     private javax.swing.JLabel lblDataInicio;
@@ -265,12 +1029,11 @@ public class DlgFicha extends javax.swing.JDialog {
     private javax.swing.JLabel lblPersonal;
     private javax.swing.JLabel lblPrevisaoTroca;
     private javax.swing.JLabel lblTitulo;
-    private javax.swing.JLabel lblTitulo1;
     private javax.swing.JPanel pnlBuscarAluno;
     private javax.swing.JScrollPane tblTreino;
     private javax.swing.JTextField txtAluno;
-    private javax.swing.JTextField txtDataInicio;
-    private javax.swing.JComboBox<String> txtPersonal;
-    private javax.swing.JTextField txtPrevisaoTroca;
+    private javax.swing.JFormattedTextField txtDataInicio;
+    private javax.swing.JComboBox<Object> txtPersonal;
+    private javax.swing.JFormattedTextField txtPrevisaoTroca;
     // End of variables declaration//GEN-END:variables
 }

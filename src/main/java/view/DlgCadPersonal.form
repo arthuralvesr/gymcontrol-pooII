@@ -178,7 +178,12 @@
             <Property name="text" type="java.lang.String" value="Data Nascimento"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JTextField" name="txtDataNasc">
+        <Component class="javax.swing.JFormattedTextField" name="txtDataNasc">
+          <Properties>
+            <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor" preCode="try {" postCode="} catch (java.text.ParseException ex) {&#xa;ex.printStackTrace();&#xa;}">
+              <Format format="##/##/####" subtype="-1" type="5"/>
+            </Property>
+          </Properties>
         </Component>
         <Container class="javax.swing.JPanel" name="pnlSexo">
           <Properties>
@@ -254,7 +259,7 @@
         <Component class="javax.swing.JFormattedTextField" name="txtTelefone">
           <Properties>
             <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor" preCode="try {" postCode="} catch (java.text.ParseException ex) {&#xa;ex.printStackTrace();&#xa;}">
-              <Format format="#####-####" subtype="-1" type="5"/>
+              <Format format="(##) #####-####" subtype="-1" type="5"/>
             </Property>
           </Properties>
           <Events>
@@ -273,7 +278,12 @@
             <Property name="text" type="java.lang.String" value="CPF"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JTextField" name="txtCpf">
+        <Component class="javax.swing.JFormattedTextField" name="txtCpf">
+          <Properties>
+            <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor" preCode="try {" postCode="} catch (java.text.ParseException ex) {&#xa;ex.printStackTrace();&#xa;}">
+              <Format format="###.###.###-##" subtype="-1" type="5"/>
+            </Property>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>
@@ -343,7 +353,12 @@
             <Property name="text" type="java.lang.String" value="CREF"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JTextField" name="txtCref">
+        <Component class="javax.swing.JFormattedTextField" name="txtCref">
+          <Properties>
+            <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor" preCode="try {" postCode="} catch (java.text.ParseException ex) {&#xa;ex.printStackTrace();&#xa;}">
+              <Format format="######-U/UU" subtype="-1" type="5"/>
+            </Property>
+          </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="lblEspecialidade">
           <Properties>
@@ -449,7 +464,12 @@
             <Property name="text" type="java.lang.String" value="Data Contratacao"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JTextField" name="txtDataContratacao">
+        <Component class="javax.swing.JFormattedTextField" name="txtDataContratacao">
+          <Properties>
+            <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor" preCode="try {" postCode="} catch (java.text.ParseException ex) {&#xa;ex.printStackTrace();&#xa;}">
+              <Format format="##/##/####" subtype="-1" type="5"/>
+            </Property>
+          </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="lblStatus">
           <Properties>

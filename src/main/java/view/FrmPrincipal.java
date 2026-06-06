@@ -1,19 +1,35 @@
 package view;
 
-import controller.AlunoController;
 import controller.GerInterGrafica;
-import controller.PersonalController;
+import controller.GerenciadorDominio;
+import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.SwingWorker;
+import model.Aluno;
+import model.Personal;
+import view.tablemodel.AlunoTableModel;
+import view.tablemodel.PersonalTableModel;
 
 public class FrmPrincipal extends javax.swing.JFrame {
 
-    private final AlunoController alunoController;
-    private final PersonalController personalController;
+    private GerenciadorDominio gerenciadorDominio;
+    private final AlunoTableModel alunoTableModel;
+    private final PersonalTableModel personalTableModel;
+    private boolean dadosIniciaisCarregados;
 
     public FrmPrincipal() {
-        this.alunoController = new AlunoController();
-        this.personalController = new PersonalController();
+        this.alunoTableModel = new AlunoTableModel();
+        this.personalTableModel = new PersonalTableModel();
         initComponents();
+        tblAlunos.setModel(alunoTableModel);
+        tblPersonal.setModel(personalTableModel);
+        atualizarIndicadores();
+        configurarCarregamentoInicial();
+        setMinimumSize(new Dimension(1120, 820));
+        setLocationRelativeTo(null);
     }
 
     @SuppressWarnings("unchecked")
@@ -86,43 +102,11 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
         lblAlunos.setText("Alunos inscritos");
 
-        tblAlunos.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "Nome", "Dt. Nascimento", "Telefone", "Objetivo", "Observacoes"
-            }
-        ) {
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
-            };
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
         tblAlunos.setComponentPopupMenu(menuPopTabela);
         tblTabelaAlunos.setViewportView(tblAlunos);
 
         lblPersonal.setText("Personais ativos");
 
-        tblPersonal.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "Nome", "Telefone", "Email", "Turno", "Status"
-            }
-        ) {
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
-            };
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
         tblTabelaPersonal.setViewportView(tblPersonal);
 
         lblTitulo.setFont(new java.awt.Font("Liberation Sans", 1, 24)); // NOI18N
@@ -155,7 +139,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
                         .addGap(6, 6, 6)
                         .addComponent(qtdAlunosInscritos2))
                     .addComponent(lblAlunosInscritos2))
-                .addContainerGap(61, Short.MAX_VALUE))
+                .addContainerGap(58, Short.MAX_VALUE))
         );
         pnlFichasFeitasLayout.setVerticalGroup(
             pnlFichasFeitasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -190,7 +174,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
                     .addGroup(pnlAlunosInscritosLayout.createSequentialGroup()
                         .addGap(83, 83, 83)
                         .addComponent(qtdAlunosInscritos)))
-                .addContainerGap(51, Short.MAX_VALUE))
+                .addContainerGap(48, Short.MAX_VALUE))
         );
         pnlAlunosInscritosLayout.setVerticalGroup(
             pnlAlunosInscritosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -225,7 +209,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
                     .addGroup(pnlPersonaisAtivosLayout.createSequentialGroup()
                         .addGap(81, 81, 81)
                         .addComponent(qtdAlunosInscritos1)))
-                .addContainerGap(44, Short.MAX_VALUE))
+                .addContainerGap(41, Short.MAX_VALUE))
         );
         pnlPersonaisAtivosLayout.setVerticalGroup(
             pnlPersonaisAtivosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -234,7 +218,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
                 .addComponent(lblAlunosInscritos1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(qtdAlunosInscritos1)
-                .addContainerGap(28, Short.MAX_VALUE))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Resource/images/gymcontrol.png"))); // NOI18N
@@ -253,10 +237,11 @@ public class FrmPrincipal extends javax.swing.JFrame {
                 .addGap(22, 22, 22))
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addComponent(pnlAlunosInscritos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
                 .addComponent(pnlPersonaisAtivos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(30, 30, 30)
-                .addComponent(pnlFichasFeitas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(pnlFichasFeitas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -271,7 +256,6 @@ public class FrmPrincipal extends javax.swing.JFrame {
                         .addContainerGap()
                         .addComponent(jLabel1)
                         .addGap(8, 8, 8)))
-                .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(pnlPersonaisAtivos, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 149, Short.MAX_VALUE)
                     .addComponent(pnlFichasFeitas, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 149, Short.MAX_VALUE)
@@ -316,6 +300,11 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
         mnListarAlunos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Resource/images/table-list.png"))); // NOI18N
         mnListarAlunos.setText("| Listar Alunos");
+        mnListarAlunos.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnListarAlunosActionPerformed(evt);
+            }
+        });
         mnCadastro.add(mnListarAlunos);
         mnCadastro.add(jSeparator1);
 
@@ -330,6 +319,11 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
         mnListarPersonal.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Resource/images/table-list.png"))); // NOI18N
         mnListarPersonal.setText("| Listar Personal");
+        mnListarPersonal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnListarPersonalActionPerformed(evt);
+            }
+        });
         mnCadastro.add(mnListarPersonal);
 
         mnMenu.add(mnCadastro);
@@ -347,6 +341,11 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
         mnListarExercicios.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Resource/images/halteres-list.png"))); // NOI18N
         mnListarExercicios.setText("| Listar Exercicios");
+        mnListarExercicios.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnListarExerciciosActionPerformed(evt);
+            }
+        });
         mnTreinos.add(mnListarExercicios);
         mnTreinos.add(jSeparator2);
 
@@ -389,51 +388,52 @@ public class FrmPrincipal extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(289, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap(24, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(lblAlunos)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtPersonal))
-                    .addComponent(tblTabelaAlunos, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(tblTabelaAlunos)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(lblPersonal)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtAlunos, javax.swing.GroupLayout.PREFERRED_SIZE, 553, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtAlunos))
+                    .addComponent(tblTabelaPersonal)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btnNovoAluno, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnNovoPersonal, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(27, 27, 27)
-                        .addComponent(btnNovaFicha, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(tblTabelaPersonal))
-                .addGap(230, 230, 230))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnNovaFicha, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(15, 15, 15)
+                .addContainerGap()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblAlunos)
                     .addComponent(txtPersonal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tblTabelaAlunos, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(tblTabelaAlunos, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblPersonal)
                     .addComponent(txtAlunos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tblTabelaPersonal, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tblTabelaPersonal, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnNovoAluno)
                     .addComponent(btnNovaFicha)
                     .addComponent(btnNovoPersonal))
-                .addGap(27, 27, 27))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
 
         pack();
@@ -444,36 +444,50 @@ public class FrmPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_mnEditarFichaActionPerformed
 
     private void mnHistoricoTreinosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnHistoricoTreinosActionPerformed
-        // TODO add your handling code here:
     }//GEN-LAST:event_mnHistoricoTreinosActionPerformed
 
     private void mnNovoAlunoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnNovoAlunoActionPerformed
         GerInterGrafica.getMyInstance().abrirCadAluno((java.awt.Frame) this, tblAlunos);
+        carregarAlunos();
+        atualizarIndicadores();
     }//GEN-LAST:event_mnNovoAlunoActionPerformed
 
     private void mnNovoPersonalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnNovoPersonalActionPerformed
         GerInterGrafica.getMyInstance().abrirCadPersonal((java.awt.Frame) this, tblPersonal);
+        carregarPersonais();
+        atualizarIndicadores();
     }//GEN-LAST:event_mnNovoPersonalActionPerformed
 
     private void ExcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExcluirActionPerformed
-        
         int linha = tblAlunos.getSelectedRow();
-        
-        if (linha >= 0) {
-    
-            if (JOptionPane.showConfirmDialog(this, "Deseja realmente excluir?", "Excluir Aluno", 
-                    JOptionPane.WARNING_MESSAGE, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION){
-                
-                alunoController.excluirAluno(tblAlunos, linha);
+        if (linha < 0) {
+            return;
+        }
+
+        if (JOptionPane.showConfirmDialog(this, "Deseja realmente excluir?", "Excluir Aluno",
+                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+            try {
+                Aluno aluno = alunoTableModel.getEntityAt(linha);
+                if (aluno != null) {
+                    getGerenciadorDominio().excluir(aluno);
+                }
+                carregarAlunos();
+                atualizarIndicadores();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this,
+                        "Erro ao excluir aluno: " + ex.getMessage(),
+                        "Erro",
+                        JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_ExcluirActionPerformed
 
     private void EditarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EditarActionPerformed
         int linha = tblAlunos.getSelectedRow();
-        
         if (linha >= 0) {
             GerInterGrafica.getMyInstance().abrirCadAluno((java.awt.Frame) this, tblAlunos, linha);
+            carregarAlunos();
+            atualizarIndicadores();
         }
     }//GEN-LAST:event_EditarActionPerformed
 
@@ -485,15 +499,145 @@ public class FrmPrincipal extends javax.swing.JFrame {
         GerInterGrafica.getMyInstance().abrirFicha();
     }//GEN-LAST:event_mnCriarFichaActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
+    private void mnListarExerciciosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnListarExerciciosActionPerformed
+        GerInterGrafica.getMyInstance().abrirBuscaExercicio(this, "");
+    }//GEN-LAST:event_mnListarExerciciosActionPerformed
+
+    private void mnListarAlunosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnListarAlunosActionPerformed
+        Aluno aluno = GerInterGrafica.getMyInstance()
+                .abrirBuscaAluno(this, txtPersonal.getText().trim());
+        if (aluno != null) {
+            carregarAlunos();
+            atualizarIndicadores();
+        }
+        selecionarAlunoNaTabela(aluno);
+    }//GEN-LAST:event_mnListarAlunosActionPerformed
+
+    private void mnListarPersonalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnListarPersonalActionPerformed
+        Personal personal = GerInterGrafica.getMyInstance()
+                .abrirBuscaPersonal(this, txtAlunos.getText().trim());
+        if (personal != null) {
+            carregarPersonais();
+            atualizarIndicadores();
+        }
+        selecionarPersonalNaTabela(personal);
+    }//GEN-LAST:event_mnListarPersonalActionPerformed
+
+    private void carregarAlunos() {
+        try {
+            List alunos = getGerenciadorDominio().listar(Aluno.class);
+            alunoTableModel.setEntities((List<Aluno>) alunos);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao listar alunos: " + ex.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void carregarPersonais() {
+        try {
+            List personais = getGerenciadorDominio().listar(Personal.class);
+            personalTableModel.setEntities((List<Personal>) personais);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao listar personais: " + ex.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void atualizarIndicadores() {
+        qtdAlunosInscritos.setText(String.valueOf(alunoTableModel.getRowCount()));
+        qtdAlunosInscritos1.setText(String.valueOf(personalTableModel.getRowCount()));
+    }
+
+    private void configurarCarregamentoInicial() {
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                carregarDadosIniciais();
+            }
+        });
+    }
+
+    private void carregarDadosIniciais() {
+        if (dadosIniciaisCarregados) {
+            return;
+        }
+        dadosIniciaisCarregados = true;
+
+        new SwingWorker<Void, Void>() {
+            private List<Aluno> alunos;
+            private List<Personal> personais;
+            private Exception erro;
+
+            @Override
+            protected Void doInBackground() {
+                try {
+                    @SuppressWarnings("unchecked")
+                    List<Aluno> alunosCarregados = getGerenciadorDominio().listar(Aluno.class);
+                    @SuppressWarnings("unchecked")
+                    List<Personal> personaisCarregados = getGerenciadorDominio().listar(Personal.class);
+                    alunos = alunosCarregados;
+                    personais = personaisCarregados;
+                } catch (Exception ex) {
+                    erro = ex;
+                }
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                if (erro != null) {
+                    JOptionPane.showMessageDialog(FrmPrincipal.this,
+                            "Erro ao carregar dados iniciais: " + erro.getMessage(),
+                            "Erro",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                alunoTableModel.setEntities(alunos);
+                personalTableModel.setEntities(personais);
+                atualizarIndicadores();
+            }
+        }.execute();
+    }
+
+    private void selecionarAlunoNaTabela(Aluno aluno) {
+        if (aluno == null) {
+            return;
+        }
+
+        int linha = alunoTableModel.findRowById(aluno.getIdAluno());
+        if (linha >= 0) {
+            tblAlunos.setRowSelectionInterval(linha, linha);
+            tblAlunos.scrollRectToVisible(tblAlunos.getCellRect(linha, 0, true));
+        }
+        txtPersonal.setText(aluno.getNome());
+    }
+
+    private void selecionarPersonalNaTabela(Personal personal) {
+        if (personal == null) {
+            return;
+        }
+
+        int linha = personalTableModel.findRowById(personal.getIdPersonal());
+        if (linha >= 0) {
+            tblPersonal.setRowSelectionInterval(linha, linha);
+            tblPersonal.scrollRectToVisible(tblPersonal.getCellRect(linha, 0, true));
+        }
+        txtAlunos.setText(personal.getNome());
+    }
+
+    private GerenciadorDominio getGerenciadorDominio() {
+        if (gerenciadorDominio == null) {
+            gerenciadorDominio = new GerenciadorDominio();
+        }
+        return gerenciadorDominio;
+    }
+
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-       //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -510,21 +654,16 @@ public class FrmPrincipal extends javax.swing.JFrame {
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(FrmPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
-        //</editor-fold>
         try {
             com.formdev.flatlaf.FlatLaf.registerCustomDefaultsSource("gymcontrol");
-
             com.formdev.flatlaf.FlatLightLaf.setup();
-
         } catch (Exception ex) {
             java.util.logging.Logger.getLogger(FrmPrincipal.class.getName())
                     .log(java.util.logging.Level.SEVERE, "Erro ao carregar o tema IFES", ex);
         }
-        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new FrmPrincipal().setVisible(true);
+                GerInterGrafica.getMyInstance().abrirPrincipal();
             }
         });
     }

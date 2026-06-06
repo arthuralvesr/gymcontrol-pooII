@@ -1,118 +1,102 @@
 package controller;
 
 import java.awt.Frame;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import model.Aluno;
+import model.Exercicio;
+import model.Personal;
 import view.DlgCadAluno;
-import view.DlgCadDivisao;
+import view.DlgBuscar;
 import view.DlgCadExercicio;
 import view.DlgCadPersonal;
 import view.DlgFicha;
 import view.FrmPrincipal;
+import view.tablemodel.AlunoTableModel;
 
 public class GerInterGrafica {
-    
+
     private FrmPrincipal janPrinc = null;
     private DlgFicha janFicha = null;
-    private DlgCadPersonal janCadPersonal = null;
-    private DlgCadExercicio janCadExercicio = null;
     private DlgCadAluno janCadAluno = null;
-    private DlgCadDivisao janCadDivisao = null;
-    
-    private GerenciadorDominio gerDominio;
-    
-    private static GerInterGrafica myInstance = new GerInterGrafica();
-    
+
+    private static final GerInterGrafica myInstance = new GerInterGrafica();
+
     private GerInterGrafica() {
-        gerDominio = new GerenciadorDominio();
-    }           
+    }
 
     public static GerInterGrafica getMyInstance() {
         return myInstance;
     }
-    
-    // ### FIM do SINGLETON
-    
-    
-    // ABRIR JDIALOG
-    private JDialog abrirJanela(Frame parent, JDialog dlg, Class classe) {
-        if (dlg == null || !dlg.isDisplayable()){     
-            try {
-                dlg = (JDialog) classe.getConstructor(Frame.class, boolean.class).newInstance(parent,true);                                
-            } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                JOptionPane.showMessageDialog(parent, "Erro ao abrir a janela " + classe.getName() + ". " + ex.getMessage() );
-            } 
-        }               
-        dlg.setVisible(true); 
-        return dlg;    
-    }
 
-    private JDialog abrirJanela(Frame parent, JDialog dlg, Class classe, JTable tabela) {
-        if (dlg == null || !dlg.isDisplayable()){
-            try {
-                dlg = (JDialog) classe.getConstructor(Frame.class, boolean.class, JTable.class).newInstance(parent, true, tabela);
-            } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                JOptionPane.showMessageDialog(parent, "Erro ao abrir a janela " + classe.getName() + ". " + ex.getMessage() );
-            }
-        }
-        dlg.setVisible(true);
-        return dlg;
-    }
-
-    private JDialog abrirJanela(Frame parent, Class classe, JTable tabela, int linha) {
-        JDialog dlg = null;
-        try {
-            dlg = (JDialog) classe.getConstructor(Frame.class, boolean.class, JTable.class, int.class).newInstance(parent, true, tabela, linha);
-        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            JOptionPane.showMessageDialog(parent, "Erro ao abrir a janela " + classe.getName() + ". " + ex.getMessage() );
-        }
-        if (dlg != null) {
-            dlg.setVisible(true);
-        }
-        return dlg;
-    }
-    
     public void abrirPrincipal() {
-        if ( janPrinc == null) {
+        if (janPrinc == null) {
             janPrinc = new FrmPrincipal();
         }
         janPrinc.setVisible(true);
     }
-    
+
     public void abrirFicha() {
-        janFicha = (DlgFicha) abrirJanela(janPrinc, janFicha, DlgFicha.class);
+        if (janFicha == null || !janFicha.isDisplayable()) {
+            janFicha = new DlgFicha(janPrinc, true);
+        }
+        janFicha.setLocationRelativeTo(janPrinc);
+        janFicha.setVisible(true);
     }
-    
+
     public void abrirCadPersonal(Frame parent, JTable tabela) {
-        janCadPersonal = (DlgCadPersonal) abrirJanela(parent, janCadPersonal, DlgCadPersonal.class, tabela);
+        DlgCadPersonal janCadPersonal = new DlgCadPersonal(parent, true, tabela);
+        janCadPersonal.setLocationRelativeTo(parent);
+        janCadPersonal.setVisible(true);
     }
-    
+
     public void abrirCadExercicio() {
-        janCadExercicio = (DlgCadExercicio) abrirJanela(janPrinc, janCadExercicio, DlgCadExercicio.class);
+        abrirCadExercicio(janPrinc);
     }
 
-    public void abrirCadDivisao() {
-        janCadDivisao = (DlgCadDivisao) abrirJanela(janPrinc, janCadDivisao, DlgCadDivisao.class);
+    public void abrirCadExercicio(Frame parent) {
+        DlgCadExercicio janCadExercicio = new DlgCadExercicio(parent, true);
+        janCadExercicio.setLocationRelativeTo(parent);
+        janCadExercicio.setVisible(true);
     }
 
-    public void abrirCadAluno(Frame parent, JTable tabela) {
-        janCadAluno = (DlgCadAluno) abrirJanela(parent, janCadAluno, DlgCadAluno.class, tabela);
+    public Aluno abrirCadAluno(Frame parent, JTable tabela) {
+        JTable tabelaAluno = tabela != null ? tabela : criarTabelaAluno();
+        janCadAluno = new DlgCadAluno(parent, true, tabelaAluno);
+        janCadAluno.setLocationRelativeTo(parent);
+        janCadAluno.setVisible(true);
+        return janCadAluno.getAlunoSalvo();
     }
 
     public void abrirCadAluno(Frame parent, JTable tabela, int linha) {
-        janCadAluno = (DlgCadAluno) abrirJanela(parent, DlgCadAluno.class, tabela, linha);
+        JTable tabelaAluno = tabela != null ? tabela : criarTabelaAluno();
+        janCadAluno = new DlgCadAluno(parent, true, tabelaAluno, linha);
+        janCadAluno.setLocationRelativeTo(parent);
+        janCadAluno.setVisible(true);
     }
 
-    
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
+    public Aluno abrirBuscaAluno(Frame parent, String filtroInicial) {
+        DlgBuscar dlgBuscar = new DlgBuscar(parent, true);
+        dlgBuscar.setLocationRelativeTo(parent);
+        return dlgBuscar.buscarAluno(filtroInicial);
+    }
+
+    public Personal abrirBuscaPersonal(Frame parent, String filtroInicial) {
+        DlgBuscar dlgBuscar = new DlgBuscar(parent, true);
+        dlgBuscar.setLocationRelativeTo(parent);
+        return dlgBuscar.buscarPersonal(filtroInicial);
+    }
+
+    public Exercicio abrirBuscaExercicio(Frame parent, String filtroInicial) {
+        DlgBuscar dlgBuscar = new DlgBuscar(parent, true);
+        dlgBuscar.setLocationRelativeTo(parent);
+        return dlgBuscar.buscarExercicio(filtroInicial);
+    }
+
+    private JTable criarTabelaAluno() {
+        return new JTable(new AlunoTableModel());
+    }
+
+    public static void main(String[] args) {
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Windows".equals(info.getName())) {
@@ -121,18 +105,13 @@ public class GerInterGrafica {
                 }
             }
         } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            // Logger.log(java.util.logging.Level.SEVERE, null, ex);
+            // Mantem o look and feel padrao.
         }
-        //</editor-fold>
 
-        
-        // TRADUÇÃO
-        javax.swing.UIManager.put("OptionPane.yesButtonText", "Sim"); 
-        javax.swing.UIManager.put("OptionPane.noButtonText", "Não");
+        javax.swing.UIManager.put("OptionPane.yesButtonText", "Sim");
+        javax.swing.UIManager.put("OptionPane.noButtonText", "Nao");
         javax.swing.UIManager.put("OptionPane.cancelButtonText", "Cancelar");
-        
-        
-        /* Create and display the form */
+
         GerInterGrafica.getMyInstance().abrirPrincipal();
     }
 }

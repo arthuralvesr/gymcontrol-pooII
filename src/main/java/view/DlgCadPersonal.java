@@ -1,26 +1,29 @@
 package view;
 
-import controller.PersonalController;
+import controller.GerenciadorDominio;
+import java.awt.Color;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import model.Personal;
+import model.enums.Sexo;
+import model.enums.Status;
+import view.tablemodel.PersonalTableModel;
 
 public class DlgCadPersonal extends javax.swing.JDialog {
     
     private final JTable tabela;
-    private final PersonalController controller;
+    private GerenciadorDominio gerenciadorDominio;
     private int linhaEd = -1;
     
     public DlgCadPersonal(java.awt.Frame parent, boolean modal, JTable tabela) {
         super(parent, modal);
         this.tabela = tabela;
-        this.controller = new PersonalController();
         initComponents();
     }
     
     public DlgCadPersonal(java.awt.Frame parent, boolean modal, JTable tabela, int linha) {
         super(parent, modal);
         this.tabela = tabela;
-        this.controller = new PersonalController();
         this.linhaEd = linha;
         initComponents();
         carregarLinha(linhaEd);   
@@ -36,7 +39,7 @@ public class DlgCadPersonal extends javax.swing.JDialog {
         lblNome = new javax.swing.JLabel();
         txtNome = new javax.swing.JTextField();
         lblDataNasc = new javax.swing.JLabel();
-        txtDataNasc = new javax.swing.JTextField();
+        txtDataNasc = new javax.swing.JFormattedTextField();
         pnlSexo = new javax.swing.JPanel();
         radioMasc = new javax.swing.JRadioButton();
         radioFem = new javax.swing.JRadioButton();
@@ -45,17 +48,17 @@ public class DlgCadPersonal extends javax.swing.JDialog {
         lblEmail = new javax.swing.JLabel();
         txtEmail = new javax.swing.JTextField();
         lblCPF = new javax.swing.JLabel();
-        txtCpf = new javax.swing.JTextField();
+        txtCpf = new javax.swing.JFormattedTextField();
         pnlDadosProfissionais = new javax.swing.JPanel();
         lblCref = new javax.swing.JLabel();
-        txtCref = new javax.swing.JTextField();
+        txtCref = new javax.swing.JFormattedTextField();
         lblEspecialidade = new javax.swing.JLabel();
         cmbEspecialidade = new javax.swing.JComboBox<>();
         lblTurno = new javax.swing.JLabel();
         cmbTurno = new javax.swing.JComboBox<>();
         pnlDadosProfissionais1 = new javax.swing.JPanel();
         lblDataContratacao = new javax.swing.JLabel();
-        txtDataContratacao = new javax.swing.JTextField();
+        txtDataContratacao = new javax.swing.JFormattedTextField();
         lblStatus = new javax.swing.JLabel();
         rdioAtivo = new javax.swing.JRadioButton();
         rdioInativo = new javax.swing.JRadioButton();
@@ -75,6 +78,12 @@ public class DlgCadPersonal extends javax.swing.JDialog {
         lblNome.setText("Nome");
 
         lblDataNasc.setText("Data Nascimento");
+
+        try {
+            txtDataNasc.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
 
         pnlSexo.setBorder(javax.swing.BorderFactory.createTitledBorder("Sexo"));
 
@@ -113,7 +122,7 @@ public class DlgCadPersonal extends javax.swing.JDialog {
         lblTelefone.setText("Telefone");
 
         try {
-            txtTelefone.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("#####-####")));
+            txtTelefone.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("(##) #####-####")));
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
@@ -126,6 +135,12 @@ public class DlgCadPersonal extends javax.swing.JDialog {
         lblEmail.setText("Email");
 
         lblCPF.setText("CPF");
+
+        try {
+            txtCpf.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("###.###.###-##")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
 
         javax.swing.GroupLayout pnlInfosPessoaisLayout = new javax.swing.GroupLayout(pnlInfosPessoais);
         pnlInfosPessoais.setLayout(pnlInfosPessoaisLayout);
@@ -187,6 +202,12 @@ public class DlgCadPersonal extends javax.swing.JDialog {
 
         lblCref.setText("CREF");
 
+        try {
+            txtCref.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("######-U/UU")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
+
         lblEspecialidade.setText("Especialidade");
 
         cmbEspecialidade.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Musculação", "Hipertrofia", "Emagrecimento", "Funcional", "Reabilitação" }));
@@ -239,6 +260,12 @@ public class DlgCadPersonal extends javax.swing.JDialog {
         pnlDadosProfissionais1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Dados Profissionais", javax.swing.border.TitledBorder.LEFT, javax.swing.border.TitledBorder.DEFAULT_POSITION));
 
         lblDataContratacao.setText("Data Contratacao");
+
+        try {
+            txtDataContratacao.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
 
         lblStatus.setText("Status");
 
@@ -367,46 +394,62 @@ public class DlgCadPersonal extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtTelefoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTelefoneActionPerformed
-        // TODO add your handling code here:
     }//GEN-LAST:event_txtTelefoneActionPerformed
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed
-        
-        String nome = txtNome.getText();
-        String dataN = txtDataNasc.getText();
-        String cpf = txtCpf.getText();
-        String telefone = txtTelefone.getText();
-        String email = txtEmail.getText();
-        String sexo = "";
-        if (groupSexo.getSelection() != null) {
-            if (groupSexo.getSelection().getMnemonic() == 'M') {
-                sexo = "Masculino";
-            } else {
-                sexo = "Feminino";
-            }
+        if (!validarCampos()) {
+            return;
         }
-        
-        
-        String cref = txtCref.getText();
+
+        String nome = txtNome.getText().trim();
+        String dataNascimento = txtDataNasc.getText().trim();
+        String cpf = txtCpf.getText().trim();
+        String telefone = txtTelefone.getText().trim();
+        String email = txtEmail.getText().trim();
+        String cref = txtCref.getText().trim();
         String especialidade = cmbEspecialidade.getSelectedItem().toString();
         String turno = cmbTurno.getSelectedItem().toString();
-        
-        
-        String dataContratacao = txtDataContratacao.getText();
-        String status = "";
-        if (groupStatus.getSelection() != null) {
-            if (groupStatus.getSelection().getMnemonic() == 'A') {
-                status = "Ativo";
-            } else {
-                status = "Inativo";
+        String dataContratacao = txtDataContratacao.getText().trim();
+        String obs = txtObs.getText().trim();
+        Sexo sexo = obterSexoSelecionado();
+        Status status = obterStatusSelecionado();
+
+        try {
+            Personal personal = getGerenciadorDominio().inserirPersonal(
+                    nome,
+                    telefone,
+                    email,
+                    cref,
+                    sexo,
+                    especialidade,
+                    turno,
+                    obs,
+                    status
+            );
+
+            // Os campos abaixo existem na tela, mas ainda nao existem no model Personal.
+            // Eles seguem coletados e validados na view ate a camada de dominio suportar persistencia.
+            if (!dataNascimento.isEmpty() || !cpf.isEmpty() || !dataContratacao.isEmpty()) {
+                personal.setObservacoes(montarObservacoes(obs, dataNascimento, cpf, dataContratacao));
             }
+
+            if (tabela != null) {
+                if (tabela.getModel() instanceof PersonalTableModel model) {
+                    model.addOrUpdate(personal);
+                }
+            }
+
+            limparCadastro();
+            JOptionPane.showMessageDialog(this, "Personal cadastrado com sucesso.");
+            dispose();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Erro ao cadastrar personal: " + ex.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
-        
-        String obs = txtObs.getText();
-        
-        Personal personal = controller.criarPersonal(nome, dataN, cpf, telefone, email, sexo,
-                cref, especialidade, turno, dataContratacao, status, obs);
-        controller.salvarPersonal(tabela, personal, linhaEd);
     }//GEN-LAST:event_btnSalvarActionPerformed
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
@@ -414,13 +457,175 @@ public class DlgCadPersonal extends javax.swing.JDialog {
     }//GEN-LAST:event_btnCancelarActionPerformed
 
     private void carregarLinha(int linha) {
-        Personal personal = controller.obterPersonal(tabela, linha);
+        if (tabela == null || linha < 0 || !(tabela.getModel() instanceof PersonalTableModel model)) {
+            return;
+        }
 
-        txtNome.setText(personal.nome());
-        txtTelefone.setText(personal.telefone());
-        txtEmail.setText(personal.email());
-        cmbTurno.setSelectedItem(personal.turno());
- 
+        Personal personal = model.getEntityAt(linha);
+        if (personal == null) {
+            return;
+        }
+
+        txtNome.setText(personal.getNome());
+        txtTelefone.setText(personal.getTelefone());
+        txtEmail.setText(personal.getEmail());
+        txtCref.setText(personal.getCref());
+        cmbEspecialidade.setSelectedItem(personal.getEspecialidade());
+        cmbTurno.setSelectedItem(personal.getTurno());
+        txtObs.setText(personal.getObservacoes());
+
+        if (personal.getSexo() == Sexo.FEMININO) {
+            radioFem.setSelected(true);
+        } else {
+            radioMasc.setSelected(true);
+        }
+
+        if (personal.getStatus() == Status.INATIVO) {
+            rdioInativo.setSelected(true);
+        } else {
+            rdioAtivo.setSelected(true);
+        }
+    }
+
+    private boolean validarCampos() {
+        StringBuilder msgErro = new StringBuilder();
+        lblNome.setForeground(Color.BLACK);
+        lblDataNasc.setForeground(Color.BLACK);
+        lblCPF.setForeground(Color.BLACK);
+        lblTelefone.setForeground(Color.BLACK);
+        lblEmail.setForeground(Color.BLACK);
+        lblCref.setForeground(Color.BLACK);
+        lblDataContratacao.setForeground(Color.BLACK);
+        lblStatus.setForeground(Color.BLACK);
+
+        if (txtNome.getText().trim().isEmpty()) {
+            msgErro.append("Digite o nome do personal.\n");
+            lblNome.setForeground(Color.RED);
+        }
+        if (!campoPreenchido(txtDataNasc)) {
+            msgErro.append("Digite a data de nascimento do personal.\n");
+            lblDataNasc.setForeground(Color.RED);
+        }
+        if (!campoPreenchido(txtCpf)) {
+            msgErro.append("Digite o CPF do personal.\n");
+            lblCPF.setForeground(Color.RED);
+        }
+        if (!campoPreenchido(txtTelefone)) {
+            msgErro.append("Digite o telefone do personal.\n");
+            lblTelefone.setForeground(Color.RED);
+        }
+        if (txtEmail.getText().trim().isEmpty()) {
+            msgErro.append("Digite o email do personal.\n");
+            lblEmail.setForeground(Color.RED);
+        }
+        if (!campoPreenchido(txtCref)) {
+            msgErro.append("Digite o CREF do personal.\n");
+            lblCref.setForeground(Color.RED);
+        }
+        if (!campoPreenchido(txtDataContratacao)) {
+            msgErro.append("Digite a data de contratacao do personal.\n");
+            lblDataContratacao.setForeground(Color.RED);
+        }
+        if (obterSexoSelecionado() == null) {
+            msgErro.append("Selecione o sexo do personal.\n");
+        }
+        if (obterStatusSelecionado() == null) {
+            msgErro.append("Selecione o status do personal.\n");
+            lblStatus.setForeground(Color.RED);
+        }
+
+        if (msgErro.length() > 0) {
+            JOptionPane.showMessageDialog(this, msgErro.toString(), "Validacao", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+
+        return true;
+    }
+
+    private String montarObservacoes(String observacoesBase, String dataNascimento, String cpf, String dataContratacao) {
+        StringBuilder observacoes = new StringBuilder();
+
+        if (observacoesBase != null && !observacoesBase.isBlank()) {
+            observacoes.append(observacoesBase.trim());
+        }
+        if (!dataNascimento.isBlank()) {
+            anexarObservacao(observacoes, "Data nascimento: " + dataNascimento);
+        }
+        if (!cpf.isBlank()) {
+            anexarObservacao(observacoes, "CPF: " + cpf);
+        }
+        if (!dataContratacao.isBlank()) {
+            anexarObservacao(observacoes, "Data contratacao: " + dataContratacao);
+        }
+
+        return observacoes.toString();
+    }
+
+    private void anexarObservacao(StringBuilder observacoes, String texto) {
+        if (observacoes.length() > 0) {
+            observacoes.append("\n");
+        }
+        observacoes.append(texto);
+    }
+
+    private boolean campoPreenchido(javax.swing.JFormattedTextField campo) {
+        String valor = campo.getText();
+        if (valor == null) {
+            return false;
+        }
+
+        String conteudo = valor.replaceAll("[\\s\\-./()_]", "");
+        return !conteudo.isEmpty();
+    }
+
+    private Sexo obterSexoSelecionado() {
+        if (radioMasc.isSelected()) {
+            return Sexo.MASCULINO;
+        }
+        if (radioFem.isSelected()) {
+            return Sexo.FEMININO;
+        }
+        return null;
+    }
+
+    private Status obterStatusSelecionado() {
+        if (rdioAtivo.isSelected()) {
+            return Status.ATIVO;
+        }
+        if (rdioInativo.isSelected()) {
+            return Status.INATIVO;
+        }
+        return null;
+    }
+
+    private void limparCadastro() {
+        txtNome.setText("");
+        txtDataNasc.setText("");
+        txtCpf.setText("");
+        txtTelefone.setText("");
+        txtEmail.setText("");
+        txtCref.setText("");
+        txtDataContratacao.setText("");
+        txtObs.setText("");
+        cmbEspecialidade.setSelectedIndex(0);
+        cmbTurno.setSelectedIndex(0);
+        groupSexo.clearSelection();
+        groupStatus.clearSelection();
+        lblNome.setForeground(Color.BLACK);
+        lblDataNasc.setForeground(Color.BLACK);
+        lblCPF.setForeground(Color.BLACK);
+        lblTelefone.setForeground(Color.BLACK);
+        lblEmail.setForeground(Color.BLACK);
+        lblCref.setForeground(Color.BLACK);
+        lblDataContratacao.setForeground(Color.BLACK);
+        lblStatus.setForeground(Color.BLACK);
+    }
+
+    private GerenciadorDominio getGerenciadorDominio() {
+        if (gerenciadorDominio == null) {
+            gerenciadorDominio = new GerenciadorDominio();
+        }
+        return gerenciadorDominio;
     }
     
     public static void main(String args[]) {
@@ -451,7 +656,7 @@ public class DlgCadPersonal extends javax.swing.JDialog {
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                DlgCadPersonal dialog = new DlgCadPersonal(new javax.swing.JFrame(), true, null, -1);
+                DlgCadPersonal dialog = new DlgCadPersonal(new javax.swing.JFrame(), true, null);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -491,10 +696,10 @@ public class DlgCadPersonal extends javax.swing.JDialog {
     private javax.swing.JRadioButton radioMasc;
     private javax.swing.JRadioButton rdioAtivo;
     private javax.swing.JRadioButton rdioInativo;
-    private javax.swing.JTextField txtCpf;
-    private javax.swing.JTextField txtCref;
-    private javax.swing.JTextField txtDataContratacao;
-    private javax.swing.JTextField txtDataNasc;
+    private javax.swing.JFormattedTextField txtCpf;
+    private javax.swing.JFormattedTextField txtCref;
+    private javax.swing.JFormattedTextField txtDataContratacao;
+    private javax.swing.JFormattedTextField txtDataNasc;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtNome;
     private javax.swing.JTextArea txtObs;

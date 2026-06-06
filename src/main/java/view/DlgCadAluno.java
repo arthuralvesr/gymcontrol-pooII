@@ -1,30 +1,38 @@
 package view;
 
-import controller.AlunoController;
+import controller.GerenciadorDominio;
 import java.awt.Color;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import model.Aluno;
+import model.enums.Sexo;
+import model.enums.Status;
+import view.tablemodel.AlunoTableModel;
 
 public class DlgCadAluno extends javax.swing.JDialog {
 
+    private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
     private final JTable tabela;
-    private final AlunoController controller;
+    private GerenciadorDominio gerenciadorDominio;
     private int linhaEd = -1;
+    private Aluno alunoSalvo;
+    private Aluno alunoEdicao;
 
     public DlgCadAluno(java.awt.Frame parent, boolean modal, JTable tabela) {
         super(parent, modal);
         this.tabela = tabela;
-        this.controller = new AlunoController();
         initComponents();
     }
     
     public DlgCadAluno(java.awt.Frame parent, boolean modal, JTable tabela, int linha) {
         super(parent, modal);
         this.tabela = tabela;
-        this.controller = new AlunoController();
         this.linhaEd = linha;
         initComponents();
         carregarLinha(linhaEd);   
@@ -62,7 +70,7 @@ public class DlgCadAluno extends javax.swing.JDialog {
         txtObs = new javax.swing.JTextArea();
         btSalvar = new javax.swing.JButton();
         lblTitulo = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        btCancelar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Cadastro de Aluno | GYMCONTROL");
@@ -121,7 +129,7 @@ public class DlgCadAluno extends javax.swing.JDialog {
         lblTelefone.setText("Telefone");
 
         try {
-            txtTelefone.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("#####-####")));
+            txtTelefone.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("(##) #####-####")));
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
@@ -284,11 +292,11 @@ public class DlgCadAluno extends javax.swing.JDialog {
         lblTitulo.setForeground(new java.awt.Color(10, 132, 255));
         lblTitulo.setText("Cadastro de Aluno");
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Resource/images/cross-circle (2).png"))); // NOI18N
-        jButton1.setText("Cancelar");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btCancelar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Resource/images/cross-circle (2).png"))); // NOI18N
+        btCancelar.setText("Cancelar");
+        btCancelar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btCancelarActionPerformed(evt);
             }
         });
 
@@ -308,10 +316,10 @@ public class DlgCadAluno extends javax.swing.JDialog {
                                 .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(txtObservacao, javax.swing.GroupLayout.PREFERRED_SIZE, 546, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(175, 175, 175)
+                        .addGap(196, 196, 196)
                         .addComponent(btSalvar)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton1)))
+                        .addComponent(btCancelar)))
                 .addContainerGap(17, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -330,7 +338,7 @@ public class DlgCadAluno extends javax.swing.JDialog {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btSalvar)
-                    .addComponent(jButton1))
+                    .addComponent(btCancelar))
                 .addContainerGap(35, Short.MAX_VALUE))
         );
 
@@ -338,117 +346,202 @@ public class DlgCadAluno extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtTelefoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTelefoneActionPerformed
-        // TODO add your handling code here:
     }//GEN-LAST:event_txtTelefoneActionPerformed
 
     private void txtDataNascActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDataNascActionPerformed
-        // TODO add your handling code here:
     }//GEN-LAST:event_txtDataNascActionPerformed
 
     private void btSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSalvarActionPerformed
-        
-        String nome = txtNome.getText();
-        String dataN = txtDataNasc.getText();
-        String telefone = txtTelefone.getText();
-        String email = txtEmail.getText();
-        String sexo = "";
-        
-        if (groupSexo.getSelection() != null) {
-            if (groupSexo.getSelection().getMnemonic() == 'M') {
-                sexo = "Masculino";
-            } else {
-                sexo = "Feminino";
-            }
+        if (!validarCampos()) {
+            return;
         }
-        
-        
-        int peso = Integer.parseInt(txtPeso.getValue().toString());
-        int altura = Integer.parseInt(txtAltura.getValue().toString());
-        List<String> objetivo = new ArrayList<>(); 
-        
-        if (chkEmagrecimento.isSelected()) objetivo.add(chkEmagrecimento.getText());
-        if (chkHipertrofia.isSelected()) objetivo.add(chkHipertrofia.getText());
-        if (chkCondicionamento.isSelected()) objetivo.add(chkCondicionamento.getText());
-        if (chkReabilitacao.isSelected()) objetivo.add(chkReabilitacao.getText());
-        
-        String obs = txtObs.getText();
-        
-        if (validarCampos()){
-            Aluno aluno = controller.criarAluno(nome, dataN, telefone, email, sexo, peso, altura, objetivo, obs);
-            controller.salvarAluno(tabela, aluno, linhaEd);
+
+        String nome = txtNome.getText().trim();
+        LocalDate dataNascimento = parseData(txtDataNasc.getText().trim());
+        String telefone = txtTelefone.getText().trim();
+        String email = txtEmail.getText().trim();
+        Sexo sexo = obterSexoSelecionado();
+        Double peso = Double.valueOf(txtPeso.getValue().toString());
+        Double altura = Double.valueOf(txtAltura.getValue().toString());
+        List<String> objetivos = obterObjetivosSelecionados();
+        String observacoes = txtObs.getText().trim();
+
+        try {
+            if (alunoEdicao == null) {
+                alunoSalvo = getGerenciadorDominio().inserirAluno(
+                        nome,
+                        dataNascimento,
+                        telefone,
+                        email,
+                        sexo,
+                        peso,
+                        altura,
+                        objetivos,
+                        observacoes,
+                        Status.ATIVO
+                );
+            } else {
+                alunoSalvo = getGerenciadorDominio().alterarAluno(
+                        alunoEdicao,
+                        nome,
+                        dataNascimento,
+                        telefone,
+                        email,
+                        sexo,
+                        peso,
+                        altura,
+                        objetivos,
+                        observacoes,
+                        Status.ATIVO
+                );
+            }
+
+            if (tabela != null) {
+                if (tabela.getModel() instanceof AlunoTableModel model) {
+                    model.addOrUpdate(alunoSalvo);
+                }
+            }
+
             limparCadastro();
+            dispose();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao salvar aluno: " + ex.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btSalvarActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btCancelarActionPerformed
         dispose();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btCancelarActionPerformed
 
     private void limparCadastro() {
-      
         txtNome.setText("");
         txtDataNasc.setText("");
         txtTelefone.setText("");
         txtEmail.setText("");
         groupSexo.clearSelection();
-        
         txtPeso.setValue(0);
         txtAltura.setValue(0);
-        
         chkEmagrecimento.setSelected(false);
         chkHipertrofia.setSelected(false);
         chkCondicionamento.setSelected(false);
         chkReabilitacao.setSelected(false);
-        
         txtObs.setText("");
-        
     }
     
     private void carregarLinha(int linha) {
-        Aluno aluno = controller.obterAluno(tabela, linha);
+        if (tabela == null || linha < 0 || !(tabela.getModel() instanceof AlunoTableModel model)) {
+            return;
+        }
 
-        txtNome.setText(aluno.nome());
-        txtDataNasc.setText(aluno.dataNascimento());
-        txtTelefone.setText(aluno.telefone());
-        txtObs.setText(aluno.observacoes());
+        alunoEdicao = model.getEntityAt(linha);
 
+        if (alunoEdicao == null) {
+            return;
+        }
+
+        txtNome.setText(alunoEdicao.getNome());
+        txtDataNasc.setText(alunoEdicao.getDataNascimento().format(FORMATO_DATA));
+        txtTelefone.setText(alunoEdicao.getTelefone());
+        txtEmail.setText(alunoEdicao.getEmail());
+        txtPeso.setValue(alunoEdicao.getPeso() == null ? 0 : alunoEdicao.getPeso().intValue());
+        txtAltura.setValue(alunoEdicao.getAltura() == null ? 0 : alunoEdicao.getAltura().intValue());
+        txtObs.setText(alunoEdicao.getObservacoes());
+
+        if (alunoEdicao.getSexo() == Sexo.FEMININO) {
+            radioFem.setSelected(true);
+        } else {
+            radioMasc.setSelected(true);
+        }
+
+        List<String> objetivos = alunoEdicao.getObjetivos() == null ? List.of() : alunoEdicao.getObjetivos();
+        chkEmagrecimento.setSelected(objetivos.contains(chkEmagrecimento.getText()));
+        chkHipertrofia.setSelected(objetivos.contains(chkHipertrofia.getText()));
+        chkCondicionamento.setSelected(objetivos.contains(chkCondicionamento.getText()));
+        chkReabilitacao.setSelected(objetivos.contains(chkReabilitacao.getText()));
     }
     
     private boolean validarCampos() {
-        
-        String msgError = "";
-        
-        if (txtNome.getText().isEmpty()){
-            msgError = msgError + "Digite o nome do Aluno(a)\n";
-            lblNome.setForeground(Color.red);
+        StringBuilder msgError = new StringBuilder();
+        lblNome.setForeground(Color.BLACK);
+        lblTelefone.setForeground(Color.BLACK);
+        lblEmail.setForeground(Color.BLACK);
+
+        if (txtNome.getText().trim().isEmpty()) {
+            msgError.append("Digite o nome do Aluno(a)\n");
+            lblNome.setForeground(Color.RED);
         }
-        if (txtTelefone.getText().isEmpty()){
-            msgError = msgError + "Digite o telefone do Aluno(a)\n";
-            lblTelefone.setForeground(Color.red);
+        if (!campoPreenchido(txtTelefone)) {
+            msgError.append("Digite o telefone do Aluno(a)\n");
+            lblTelefone.setForeground(Color.RED);
         }
-        if (txtEmail.getText().isEmpty()) {
-            msgError = msgError + "Digite o email do Aluno(a)\n";
-            lblEmail.setForeground(Color.red);
+        if (txtEmail.getText().trim().isEmpty()) {
+            msgError.append("Digite o email do Aluno(a)\n");
+            lblEmail.setForeground(Color.RED);
         }
         if (groupSexo.getSelection() == null) {
-            msgError = msgError + "Digite o sexo do Aluno(a)\n";
+            msgError.append("Digite o sexo do Aluno(a)\n");
         }
-        
-        if (msgError.isEmpty()) {
+        if (!campoPreenchido(txtDataNasc)) {
+            msgError.append("Digite a data de nascimento do Aluno(a)\n");
+        }
+
+        if (msgError.length() == 0) {
             return true;
-        } else {
-            JOptionPane.showMessageDialog(this, msgError);
-            
+        }
+
+        JOptionPane.showMessageDialog(this, msgError.toString());
+        return false;
+    }
+
+    private Sexo obterSexoSelecionado() {
+        if (radioFem.isSelected()) {
+            return Sexo.FEMININO;
+        }
+        return Sexo.MASCULINO;
+    }
+
+    private List<String> obterObjetivosSelecionados() {
+        List<String> objetivos = new ArrayList<>();
+        if (chkEmagrecimento.isSelected()) objetivos.add(chkEmagrecimento.getText());
+        if (chkHipertrofia.isSelected()) objetivos.add(chkHipertrofia.getText());
+        if (chkCondicionamento.isSelected()) objetivos.add(chkCondicionamento.getText());
+        if (chkReabilitacao.isSelected()) objetivos.add(chkReabilitacao.getText());
+        return objetivos;
+    }
+
+    private LocalDate parseData(String data) {
+        try {
+            return LocalDate.parse(data, FORMATO_DATA);
+        } catch (DateTimeParseException ex) {
+            return LocalDate.now();
+        }
+    }
+
+    private boolean campoPreenchido(javax.swing.JFormattedTextField campo) {
+        String valor = campo.getText();
+        if (valor == null) {
             return false;
         }
+
+        String conteudo = valor.replaceAll("[\\s\\-./()_]", "");
+        return !conteudo.isEmpty();
+    }
+
+    public Aluno getAlunoSalvo() {
+        return alunoSalvo;
+    }
+
+    private GerenciadorDominio getGerenciadorDominio() {
+        if (gerenciadorDominio == null) {
+            gerenciadorDominio = new GerenciadorDominio();
+        }
+        return gerenciadorDominio;
     }
     
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -465,10 +558,7 @@ public class DlgCadAluno extends javax.swing.JDialog {
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(DlgCadAluno.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
-        //</editor-fold>
 
-        /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 DlgCadAluno dialog = new DlgCadAluno(new javax.swing.JFrame(), true, null);
@@ -484,13 +574,13 @@ public class DlgCadAluno extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btCancelar;
     private javax.swing.JButton btSalvar;
     private javax.swing.JCheckBox chkCondicionamento;
     private javax.swing.JCheckBox chkEmagrecimento;
     private javax.swing.JCheckBox chkHipertrofia;
     private javax.swing.JCheckBox chkReabilitacao;
     private javax.swing.ButtonGroup groupSexo;
-    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
